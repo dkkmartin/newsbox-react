@@ -1,40 +1,51 @@
 import { Offcanvas, Form } from 'react-bootstrap'
-import FormCheckInput from 'react-bootstrap/FormCheckInput'
 import { loadFromStorage, saveToStorage } from '@/utils/utils'
-import { useEffect } from 'react'
+import { useState } from 'react'
 
 export default function Settings({ settingsShow, handleClose }) {
-  useEffect(() => {
-    if (!loadFromStorage('settings')) {
-      const defaultSettings = [
-        {
-          name: 'flexSwitchCheckDefaultPopular',
-          checked: false,
-        },
-        {
-          name: 'flexSwitchCheckDefaultEuropa',
-          checked: true,
-        },
-        {
-          name: 'flexSwitchCheckDefaultHealth',
-          checked: true,
-        },
-        {
-          name: 'flexSwitchCheckDefaultSport',
-          checked: true,
-        },
-        {
-          name: 'flexSwitchCheckDefaultBusiness',
-          checked: true,
-        },
-        {
-          name: 'flexSwitchCheckDefaultTravel',
-          checked: true,
-        },
-      ]
-      saveToStorage('settings', defaultSettings)
-    }
-  })
+  let defaultSettings
+  if (!loadFromStorage('settings')) {
+    defaultSettings = [
+      {
+        name: 'Popular',
+        checked: false,
+      },
+      {
+        name: 'Europa',
+        checked: true,
+      },
+      {
+        name: 'Health',
+        checked: true,
+      },
+      {
+        name: 'Sport',
+        checked: true,
+      },
+      {
+        name: 'Business',
+        checked: true,
+      },
+      {
+        name: 'Travel',
+        checked: true,
+      },
+    ]
+    saveToStorage('settings', defaultSettings)
+  }
+  const [settings, setSettings] = useState(
+    loadFromStorage('settings') ? loadFromStorage('settings') : defaultSettings,
+  )
+
+  function handleClick(index) {
+    setSettings((prevSettings) => {
+      const updatedSettings = [...prevSettings] // Create a copy of the settings array
+      updatedSettings[index] = { ...updatedSettings[index] } // Create a copy of the specific setting object
+      updatedSettings[index].checked = !updatedSettings[index].checked // Update the checked property
+      saveToStorage('settings', updatedSettings)
+      return updatedSettings
+    })
+  }
 
   return (
     <>
@@ -51,66 +62,24 @@ export default function Settings({ settingsShow, handleClose }) {
           </div>
 
           <Form className="container-fluid border rounded-4 p-0 bg-body">
-            <div className="container-fluid border-bottom py-3">
-              <Form.Check
-                reverse
-                checked="true"
-                className="fw-bold text-start fs-5"
-                type="switch"
-                id="custom-switch"
-                label="MOST POPULAR"
-              />
-            </div>
-            <div className="container-fluid border-bottom py-3">
-              <Form.Check
-                reverse
-                className="fw-bold text-start fs-5"
-                type="switch"
-                id="custom-switch"
-                label="EUROPA"
-              />
-            </div>
-            <div className="container-fluid border-bottom py-3">
-              <Form.Check
-                reverse
-                className="fw-bold text-start fs-5"
-                type="switch"
-                id="custom-switch"
-                label="HEALTH"
-              />
-            </div>
-            <div className="container-fluid border-bottom py-3">
-              <Form.Check
-                reverse
-                className="fw-bold text-start fs-5"
-                type="switch"
-                id="custom-switch"
-                label="SPORT"
-              />
-            </div>
-            <div className="container-fluid border-bottom py-3">
-              <Form.Check
-                reverse
-                className="fw-bold text-start fs-5"
-                type="switch"
-                id="custom-switch"
-                label="BUSINESS"
-              />
-            </div>
-            <div className="container-fluid border-bottom py-3">
-              <Form.Check
-                reverse
-                className="fw-bold text-start fs-5"
-                type="switch"
-                id="custom-switch"
-                label="TRAVEL"
-              />
-            </div>
+            {settings.map((setting, index) => (
+              <div className="container-fluid border-bottom py-3" key={index}>
+                <Form.Check
+                  reverse
+                  checked={setting.checked}
+                  className="fw-bold text-start fs-5"
+                  type="switch"
+                  id={`custom-switch-${index}`}
+                  label={setting.name}
+                  onChange={() => handleClick(index)}
+                />
+              </div>
+            ))}
           </Form>
 
           <button
             id="toggleDarkModeButton"
-            class="btn text-uppercase fw-light border border-secondary border-opacity-25 rounded-pill py-2 px-2"
+            className="btn text-uppercase fw-light border border-secondary border-opacity-25 rounded-pill py-2 px-2"
             data-bs-theme-value="dark"
           >
             Toggle Light Mode
